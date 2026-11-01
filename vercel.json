@@ -1,8 +1,7 @@
 {
-  "version": 2,
   "rewrites": [
     {
-      "source": "/api/signaling/(.*)",
+      "source": "/api/signaling/:path*",
       "destination": "/api/signaling.js"
     },
     {
@@ -10,16 +9,12 @@
       "destination": "/api/signaling.js"
     },
     {
-      "source": "/api/users/(.*)",
+      "source": "/api/users/:path*",
       "destination": "/api/users.js"
     },
     {
       "source": "/api/users",
       "destination": "/api/users.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
     }
   ]
 }

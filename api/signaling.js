@@ -1,15 +1,7 @@
 /**
  * Vercel Serverless Function: /api/signaling
  * Provides WebRTC signaling coordination for MeshChat on Vercel deployment.
- * Supports:
- * - Sending WebRTC SDP Offer, SDP Answer, ICE Candidates, Typing, Message Relay, Acks
- * - Polling unread signals
- * - Server-Sent Events (SSE) streaming where supported
  */
-
-// Note: In serverless environments, module-level memory is preserved during warm invocations.
-// For multi-region serverless deployment, MeshChat documents optional Vercel KV / Upstash Redis
-// configuration, but works out-of-the-box with immediate memory + edge sync.
 
 let signalsStore = globalThis.__meshchat_signals || [];
 globalThis.__meshchat_signals = signalsStore;
@@ -24,9 +16,14 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { action, user, since } = req.query;
+  // Support both /api/signaling/<action> and ?action=<action>
+  const urlPath = req.url ? req.url.split('?')[0] : '';
+  const pathParts = urlPath.split('/').filter(Boolean);
+  const lastSegment = pathParts[pathParts.length - 1] || '';
+  const action = req.query.action || (lastSegment !== 'signaling' ? lastSegment : '');
+  const { user, since } = req.query;
 
-  // POST: Send signaling message
+  // POST: Send signaling message (/api/signaling/send or POST /api/signaling)
   if (req.method === 'POST') {
     try {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -66,7 +63,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing "user" query parameter' });
     }
 
-    // Server-Sent Events (SSE) mode
+    // Server-Sent Events (SSE) mode: /api/signaling/stream or ?action=stream
     if (action === 'stream') {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -94,7 +91,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Polling mode
+    // Polling mode: /api/signaling/poll or default GET
     const sinceTime = Number(since) || 0;
     const pending = signalsStore.filter((s) => s.to === targetUser && s.timestamp > sinceTime);
 
@@ -104,5 +101,5 @@ export default async function handler(req, res) {
     });
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }

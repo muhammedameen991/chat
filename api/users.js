@@ -15,9 +15,13 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { action } = req.query;
+  // Support both /api/users/<action> path routing and ?action=<action> query param
+  const urlPath = req.url ? req.url.split('?')[0] : '';
+  const pathParts = urlPath.split('/').filter(Boolean);
+  const lastSegment = pathParts[pathParts.length - 1] || '';
+  const action = req.query.action || (lastSegment !== 'users' ? lastSegment : '');
 
-  // Search users
+  // Search users: GET /api/users/search or GET /api/users
   if (req.method === 'GET') {
     const query = (req.query.q || '').trim().toLowerCase();
     const current = (req.query.currentUser || '').trim().toLowerCase();
@@ -41,7 +45,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ results });
   }
 
-  // Register or Login or Heartbeat
+  // Register, Login, or Heartbeat
   if (req.method === 'POST') {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
@@ -58,7 +62,7 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: 'Username is already taken' });
       }
 
-      const cleanName = (displayName && displayName.trim()) ? displayName.trim().slice(0, 30) : cleanUser;
+      const cleanName = displayName && displayName.trim() ? displayName.trim().slice(0, 30) : cleanUser;
       const user = {
         username: cleanUser,
         displayName: cleanName,
@@ -92,10 +96,30 @@ export default async function handler(req, res) {
       }
       return res.status(200).json({ ok: true, timestamp: Date.now() });
     }
+
+    // Default POST fallback if no action matched: check body fields
+    if (body?.username && body?.displayName) {
+      // Treat as register
+      const cleanUser = body.username.trim().toLowerCase();
+      if (usersStore[cleanUser]) {
+        return res.status(409).json({ error: 'Username is already taken' });
+      }
+      const user = {
+        username: cleanUser,
+        displayName: body.displayName.trim().slice(0, 30),
+        avatar: body.avatar || 'avatar_1',
+        bio: body.bio || 'Hey there! I am using MeshChat.',
+        createdAt: Date.now(),
+        lastActive: Date.now(),
+      };
+      usersStore[cleanUser] = user;
+      globalThis.__meshchat_users = usersStore;
+      return res.status(201).json({ success: true, user });
+    }
   }
 
   // Update profile
-  if (req.method === 'PATCH') {
+  if (req.method === 'PATCH' || action === 'profile') {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { username, displayName, avatar, bio } = body || {};
     const cleanUser = (username || '').trim().toLowerCase();
@@ -111,8 +135,9 @@ export default async function handler(req, res) {
   }
 
   // Delete account
-  if (req.method === 'DELETE') {
-    const { username } = req.body || {};
+  if (req.method === 'DELETE' || action === 'account') {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { username } = body || req.query || {};
     const cleanUser = (username || '').trim().toLowerCase();
     if (usersStore[cleanUser]) {
       delete usersStore[cleanUser];
@@ -120,5 +145,5 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true });
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  return res.status(405).json({ error: `Method ${req.method} or action ${action} not allowed` });
 }

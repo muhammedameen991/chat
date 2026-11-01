@@ -1,0 +1,17 @@
+{
+  "name": "MeshChat",
+  "short_name": "MeshChat",
+  "description": "Production-Ready Real-Time Peer-to-Peer Messaging Application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF4DE",
+  "theme_color": "#FFCED8",
+  "icons": [
+    {
+      "src": "/assets/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
