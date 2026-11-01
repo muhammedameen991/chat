@@ -1,0 +1,6 @@
+{
+  "name": "MeshChat",
+  "description": "Production-ready real-time peer-to-peer messaging application powered by WebRTC and WhatsApp-inspired Pastel Rose UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

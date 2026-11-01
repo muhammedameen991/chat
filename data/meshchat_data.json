@@ -1,0 +1,82 @@
+{
+  "users": {
+    "alice": {
+      "username": "alice",
+      "displayName": "Alice Wonderland",
+      "avatar": "avatar_1",
+      "bio": "Hey there! I am using MeshChat.",
+      "createdAt": 1793512238508,
+      "lastActive": 1793512430691
+    },
+    "bob_builder": {
+      "username": "bob_builder",
+      "displayName": "Bob Builder",
+      "avatar": "avatar_2",
+      "bio": "Building peer-to-peer!",
+      "createdAt": 1793512250405,
+      "lastActive": 1793512250405
+    },
+    "carol": {
+      "username": "carol",
+      "displayName": "Carol Danvers",
+      "avatar": "avatar_5",
+      "bio": "Higher, further, faster!",
+      "createdAt": 1793512250422,
+      "lastActive": 1793512250422
+    }
+  },
+  "signals": [
+    {
+      "id": "sig_1793512348557_2gppqf",
+      "from": "alice",
+      "to": "bob_builder",
+      "type": "offer",
+      "payload": {
+        "sdp": "v=0\r\no=- 2490582211895555709 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=ice-ufrag:5Wtd\r\na=ice-pwd:M3vfubPsAiE0ujX1meZ24L+O\r\na=ice-options:trickle\r\na=fingerprint:sha-256 55:C2:00:7C:74:5B:0B:26:50:E5:3B:A5:F6:21:8E:63:7C:F3:22:B4:4E:52:37:3B:27:BF:6F:93:B9:F9:28:53\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n",
+        "type": "offer"
+      },
+      "timestamp": 1793512348553
+    },
+    {
+      "id": "sig_1793512351678_sgmaqg",
+      "from": "alice",
+      "to": "bob_builder",
+      "type": "message",
+      "payload": {
+        "type": "typing",
+        "isTyping": true,
+        "timestamp": 1793512351674
+      },
+      "timestamp": 1793512351674
+    },
+    {
+      "id": "sig_1793512352883_7a59rn",
+      "from": "alice",
+      "to": "bob_builder",
+      "type": "message",
+      "payload": {
+        "type": "chat",
+        "id": "msg_1793512352817_ypa0o9v",
+        "text": "Hello Bob! Testing real WebRTC messaging on MeshChat.",
+        "file": null,
+        "timestamp": 1793512352817,
+        "sender": "alice",
+        "displayName": "Alice Wonderland",
+        "avatar": "avatar_1"
+      },
+      "timestamp": 1793512352878
+    },
+    {
+      "id": "sig_1793512353180_i4rd93",
+      "from": "alice",
+      "to": "bob_builder",
+      "type": "message",
+      "payload": {
+        "type": "typing",
+        "isTyping": false,
+        "timestamp": 1793512353176
+      },
+      "timestamp": 1793512353176
+    }
+  ]
+}

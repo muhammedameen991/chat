@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/signaling/(.*)",
+      "destination": "/api/signaling.js"
+    },
+    {
+      "source": "/api/signaling",
+      "destination": "/api/signaling.js"
+    },
+    {
+      "source": "/api/users/(.*)",
+      "destination": "/api/users.js"
+    },
+    {
+      "source": "/api/users",
+      "destination": "/api/users.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}
