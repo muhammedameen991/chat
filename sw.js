@@ -1,9 +1,9 @@
 /**
- * MeshChat - Service Worker
+ * Golden Grove - Service Worker
  * Provides offline shell caching and network-first dynamic resource fetching.
  */
 
-const CACHE_NAME = 'meshchat-v1';
+const CACHE_NAME = 'goldengrove-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

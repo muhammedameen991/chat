@@ -1,5 +1,5 @@
 /**
- * MeshChat - Production Real-Time Peer-to-Peer Messaging Application
+ * Golden Grove - Production Real-Time Peer-to-Peer Messaging Application
  * Application Bootstrap Entrypoint
  */
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
-          console.log('MeshChat Service Worker registered:', reg.scope);
+          console.log('Golden Grove Service Worker registered:', reg.scope);
         })
         .catch((err) => {
           console.warn('Service Worker registration skipped or failed:', err);
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('keydown', (e) => {
       // Escape to close open modal
       if (e.key === 'Escape') {
-        const modal = document.getElementById('modalOverlay');
+        const modal = document.getElementById('groveModalOverlay');
         if (modal && modal.style.display !== 'none') {
           ui.hideModal();
         }
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    console.log('MeshChat loaded successfully.');
+    console.log('Golden Grove loaded successfully.');
   } catch (err) {
-    console.error('MeshChat initialization error:', err);
+    console.error('Golden Grove initialization error:', err);
   }
 });

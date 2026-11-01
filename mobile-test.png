@@ -1,0 +1,68 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - navigation "Main Navigation" [ref=e4]:
+      - tablist [ref=e10]:
+        - tab "Chats" [ref=e11] [cursor=pointer]
+        - tab "Friends" [ref=e14] [cursor=pointer]
+        - tab "Requests" [ref=e20] [cursor=pointer]
+        - tab "Settings" [ref=e24] [cursor=pointer]
+      - button "Profile" [ref=e29] [cursor=pointer]
+    - complementary [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - heading "Messages" [level=1] [ref=e33]
+          - button "New Chat" [ref=e34] [cursor=pointer]
+        - textbox "Search" [ref=e37]:
+          - /placeholder: Search conversations...
+        - generic [ref=e38]:
+          - button "All" [ref=e39] [cursor=pointer]
+          - button "Unread" [ref=e40] [cursor=pointer]
+          - button "Online" [ref=e41] [cursor=pointer]
+      - list [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 🍃
+          - paragraph [ref=e45]: Your Golden Grove begins here.
+          - paragraph [ref=e46]: Connect with friends and share moments in nature-inspired tranquility.
+          - button "Find Friends" [ref=e47] [cursor=pointer]
+    - main [ref=e48]:
+      - generic [ref=e50]:
+        - img "Golden Grove" [ref=e52]
+        - heading "Welcome to Golden Grove" [level=2] [ref=e53]
+        - paragraph [ref=e54]: Experience warm, nature-inspired peer-to-peer messaging. Direct WebRTC DataChannels keep your conversations private, swift, and serene.
+        - generic [ref=e55]:
+          - generic [ref=e56]: ☀️ Encrypted WebRTC
+          - generic [ref=e57]: 🌿 Local IndexedDB
+          - generic [ref=e58]: 🍯 Vercel Coordination
+        - button "Find Grove Friends" [ref=e59] [cursor=pointer]
+  - generic [ref=e65]:
+    - generic [ref=e66]:
+      - img "Golden Grove" [ref=e67]
+      - heading "Golden Grove" [level=2] [ref=e68]
+      - paragraph [ref=e69]: A warm, nature-inspired peer-to-peer messaging haven.
+    - generic [ref=e70]:
+      - button "Create Account" [ref=e71] [cursor=pointer]
+      - button "Sign In" [ref=e72] [cursor=pointer]
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - generic [ref=e75]: Unique Username
+        - textbox "Unique Username" [ref=e76]:
+          - /placeholder: e.g. golden_leaf
+        - generic [ref=e77]: 3-20 characters (lowercase letters, numbers, underscores).
+      - generic [ref=e78]:
+        - generic [ref=e79]: Display Name
+        - textbox "Display Name" [ref=e80]:
+          - /placeholder: e.g. Sylvan Woods
+      - generic [ref=e81]:
+        - generic [ref=e82]: Choose Nature Avatar
+        - generic [ref=e83]:
+          - button "☀️" [ref=e84] [cursor=pointer]
+          - button "🌳" [ref=e86] [cursor=pointer]
+          - button "🦊" [ref=e88] [cursor=pointer]
+          - button "🍃" [ref=e90] [cursor=pointer]
+          - button "🌸" [ref=e92] [cursor=pointer]
+          - button "🌲" [ref=e94] [cursor=pointer]
+      - generic [ref=e96]:
+        - generic [ref=e97]: About / Bio (optional)
+        - textbox "About / Bio (optional)" [ref=e98]:
+          - /placeholder: Living peacefully in Golden Grove.
+      - button "Join Golden Grove" [ref=e99] [cursor=pointer]

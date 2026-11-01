@@ -31,15 +31,26 @@ interface SignalEnvelope {
   timestamp: number;
 }
 
+interface FriendRequest {
+  id: string;
+  from: string;
+  to: string;
+  timestamp: number;
+}
+
 interface AppDatabase {
   users: Record<string, UserRecord>;
   signals: SignalEnvelope[];
+  friends: Record<string, string[]>;
+  requests: FriendRequest[];
 }
 
 // In-memory state
 let db: AppDatabase = {
   users: {},
   signals: [],
+  friends: {},
+  requests: [],
 };
 
 // Load data from file if exists
@@ -51,6 +62,10 @@ function loadDatabase() {
     if (fs.existsSync(DATA_FILE)) {
       const content = fs.readFileSync(DATA_FILE, 'utf-8');
       db = JSON.parse(content);
+      if (!db.friends) db.friends = {};
+      if (!db.requests) db.requests = [];
+      if (!db.users) db.users = {};
+      if (!db.signals) db.signals = [];
     }
   } catch (err) {
     console.error('Error loading database:', err);
@@ -193,6 +208,47 @@ app.get('/api/users/search', (req: Request, res: Response) => {
       if (!query) return true;
       return u.username.includes(query) || u.displayName.toLowerCase().includes(query);
     })
+    .map((u) => {
+      const userFriends = current ? (db.friends[current] || []) : [];
+      const isFriend = userFriends.includes(u.username);
+      const outgoingReq = current
+        ? db.requests.find((r) => r.from === current && r.to === u.username)
+        : null;
+      const incomingReq = current
+        ? db.requests.find((r) => r.from === u.username && r.to === current)
+        : null;
+
+      let relationship = 'none';
+      if (isFriend) relationship = 'friend';
+      else if (outgoingReq) relationship = 'sent';
+      else if (incomingReq) relationship = 'received';
+
+      return {
+        username: u.username,
+        displayName: u.displayName,
+        avatar: u.avatar,
+        bio: u.bio,
+        isOnline: now - u.lastActive < 45 * 1000,
+        lastActive: u.lastActive,
+        relationship,
+      };
+    });
+
+  res.json({ results });
+});
+
+// Friends List
+app.get('/api/users/friends', (req: Request, res: Response) => {
+  const current = typeof req.query.username === 'string' ? req.query.username.trim().toLowerCase() : '';
+  if (!current) {
+    res.status(400).json({ error: 'Username is required' });
+    return;
+  }
+  const friendUsernames = db.friends[current] || [];
+  const now = Date.now();
+  const friendsList = friendUsernames
+    .map((u) => db.users[u])
+    .filter(Boolean)
     .map((u) => ({
       username: u.username,
       displayName: u.displayName,
@@ -201,8 +257,125 @@ app.get('/api/users/search', (req: Request, res: Response) => {
       isOnline: now - u.lastActive < 45 * 1000,
       lastActive: u.lastActive,
     }));
+  res.json({ friends: friendsList });
+});
 
-  res.json({ results });
+// Friend Requests (Incoming & Outgoing)
+app.get('/api/users/requests', (req: Request, res: Response) => {
+  const current = typeof req.query.username === 'string' ? req.query.username.trim().toLowerCase() : '';
+  if (!current) {
+    res.status(400).json({ error: 'Username is required' });
+    return;
+  }
+  const incoming = db.requests
+    .filter((r) => r.to === current)
+    .map((r) => {
+      const u = db.users[r.from];
+      return {
+        id: r.id,
+        from: r.from,
+        to: r.to,
+        timestamp: r.timestamp,
+        displayName: u?.displayName || r.from,
+        avatar: u?.avatar || 'avatar_1',
+        bio: u?.bio || '',
+      };
+    });
+
+  const outgoing = db.requests
+    .filter((r) => r.from === current)
+    .map((r) => {
+      const u = db.users[r.to];
+      return {
+        id: r.id,
+        from: r.from,
+        to: r.to,
+        timestamp: r.timestamp,
+        displayName: u?.displayName || r.to,
+        avatar: u?.avatar || 'avatar_1',
+        bio: u?.bio || '',
+      };
+    });
+
+  res.json({ incoming, outgoing });
+});
+
+// Send Friend Request
+app.post('/api/users/requests/send', (req: Request, res: Response) => {
+  const { from, to } = req.body || {};
+  if (!from || !to) {
+    res.status(400).json({ error: 'Both from and to are required' });
+    return;
+  }
+  const cleanFrom = String(from).trim().toLowerCase();
+  const cleanTo = String(to).trim().toLowerCase();
+
+  if (cleanFrom === cleanTo) {
+    res.status(400).json({ error: 'Cannot send friend request to yourself' });
+    return;
+  }
+  if (!db.users[cleanTo]) {
+    res.status(404).json({ error: 'User does not exist' });
+    return;
+  }
+
+  // Check if already friends
+  const fromFriends = db.friends[cleanFrom] || [];
+  if (fromFriends.includes(cleanTo)) {
+    res.status(400).json({ error: 'Already friends' });
+    return;
+  }
+
+  // Check if request already pending
+  const existing = db.requests.find(
+    (r) => (r.from === cleanFrom && r.to === cleanTo) || (r.from === cleanTo && r.to === cleanFrom)
+  );
+  if (existing) {
+    res.status(400).json({ error: 'A friend request is already pending between these users' });
+    return;
+  }
+
+  const newReq: FriendRequest = {
+    id: `req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    from: cleanFrom,
+    to: cleanTo,
+    timestamp: Date.now(),
+  };
+  db.requests.push(newReq);
+  saveDatabase();
+
+  res.status(201).json({ success: true, request: newReq });
+});
+
+// Respond to Friend Request (Accept or Decline)
+app.post('/api/users/requests/respond', (req: Request, res: Response) => {
+  const { from, to, action } = req.body || {};
+  if (!from || !to || !action) {
+    res.status(400).json({ error: 'from, to, and action required' });
+    return;
+  }
+  const cleanFrom = String(from).trim().toLowerCase();
+  const cleanTo = String(to).trim().toLowerCase();
+
+  const reqIndex = db.requests.findIndex((r) => r.from === cleanFrom && r.to === cleanTo);
+  if (reqIndex === -1) {
+    res.status(404).json({ error: 'Request not found' });
+    return;
+  }
+
+  // Remove request from pending list
+  db.requests.splice(reqIndex, 1);
+
+  if (action === 'accept') {
+    if (!db.friends[cleanFrom]) db.friends[cleanFrom] = [];
+    if (!db.friends[cleanTo]) db.friends[cleanTo] = [];
+
+    if (!db.friends[cleanFrom].includes(cleanTo)) db.friends[cleanFrom].push(cleanTo);
+    if (!db.friends[cleanTo].includes(cleanFrom)) db.friends[cleanTo].push(cleanFrom);
+  }
+
+  saveDatabase();
+  res.json({ success: true, action });
 });
 
 // Update Profile

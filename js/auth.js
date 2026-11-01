@@ -1,5 +1,5 @@
 /**
- * MeshChat - Authentication & Session Management
+ * Golden Grove - Authentication & Session Management
  * Handles real username-based registration, login, logout, account deletion, and profile state.
  * Never fakes credentials or hardcodes users.
  */
@@ -49,7 +49,7 @@ export class AuthManager {
       username: userVal.sanitized,
       displayName: nameVal.sanitized,
       avatar: avatar || 'avatar_1',
-      bio: (bio || 'Hey there! I am using MeshChat.').slice(0, 100),
+      bio: (bio || 'Living peacefully in Golden Grove.').slice(0, 100),
     };
 
     const res = await fetch('/api/users/register', {

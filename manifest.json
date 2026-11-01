@@ -1,11 +1,11 @@
 {
-  "name": "MeshChat",
-  "short_name": "MeshChat",
-  "description": "Production-Ready Real-Time Peer-to-Peer Messaging Application",
+  "name": "Golden Grove",
+  "short_name": "Golden Grove",
+  "description": "Modern, warm, nature-inspired real-time peer-to-peer messaging application",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFF4DE",
-  "theme_color": "#FFCED8",
+  "background_color": "#FFF9ED",
+  "theme_color": "#557945",
   "icons": [
     {
       "src": "/assets/logo.svg",
