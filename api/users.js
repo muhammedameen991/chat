@@ -20,12 +20,34 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Parse path and action
-  const urlPath = req.url ? req.url.split('?')[0] : '';
+  let body = {};
+  if (req.body) {
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (e) {
+      body = {};
+    }
+  }
+
+  // Parse path and action reliably across Vercel rewrites, proxies, and local servers
+  const rawUrl = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.url || '';
+  const urlPath = rawUrl.split('?')[0];
   const pathParts = urlPath.split('/').filter(Boolean);
-  const lastSegment = pathParts[pathParts.length - 1] || '';
-  const isReqSub = pathParts.includes('requests');
-  const action = req.query.action || (lastSegment !== 'users' ? lastSegment : '');
+  const lastPart = pathParts[pathParts.length - 1] || '';
+  const pathAction = (lastPart && !lastPart.startsWith('users')) ? lastPart.replace(/\.js$/, '') : '';
+  
+  let action = (req.query.action || body.action || pathAction || '').toLowerCase();
+  if (pathParts.includes('register')) action = 'register';
+  else if (pathParts.includes('login')) action = 'login';
+  else if (pathParts.includes('heartbeat')) action = 'heartbeat';
+  else if (pathParts.includes('friends')) action = 'friends';
+  else if (pathParts.includes('requests')) {
+    if (pathParts.includes('send') || (body && body.action === 'send')) action = 'send';
+    else if (pathParts.includes('respond') || (body && body.action === 'respond')) action = 'respond';
+    else action = 'requests';
+  }
+
+  const isReqSub = pathParts.includes('requests') || action === 'requests' || action === 'send' || action === 'respond';
 
   // 1. GET Requests (Search, Friends list, Friend Requests)
   if (req.method === 'GET') {
@@ -126,7 +148,6 @@ export default async function handler(req, res) {
 
   // 2. POST Requests (Register, Login, Heartbeat, Send Request, Respond to Request)
   if (req.method === 'POST') {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     // Send Friend Request: /api/users/requests/send
     if (action === 'send' || (isReqSub && pathParts.includes('send'))) {

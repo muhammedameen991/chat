@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <defs>
+    <linearGradient id="peakSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F1A344"/>
+      <stop offset="100%" stop-color="#FFCB3D"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="40" fill="url(#peakSky)"/>
+  <circle cx="80" cy="65" r="32" fill="#FFF9ED" opacity="0.9"/>
+  <polygon points="80,50 30,140 130,140" fill="#3A532E"/>
+  <polygon points="80,50 80,140 130,140" fill="#557945"/>
+  <polygon points="80,50 64,80 80,75 96,80" fill="#FFF9ED"/>
+  <polygon points="120,80 90,140 150,140" fill="#5D9253"/>
+  <polygon points="40,88 10,140 70,140" fill="#23381B"/>
+</svg>

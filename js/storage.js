@@ -186,6 +186,135 @@ class MeshStorage {
     });
   }
 
+  async editMessage(id, newText) {
+    const db = await this.getDb();
+    if (!db) return null;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readwrite');
+      const store = tx.objectStore('messages');
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const msg = getReq.result;
+        if (msg) {
+          msg.text = newText;
+          msg.edited = true;
+          msg.editedAt = Date.now();
+          store.put(msg);
+          resolve(msg);
+        } else {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
+
+  async togglePinMessage(id) {
+    const db = await this.getDb();
+    if (!db) return null;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readwrite');
+      const store = tx.objectStore('messages');
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const msg = getReq.result;
+        if (msg) {
+          msg.pinned = !msg.pinned;
+          store.put(msg);
+          resolve(msg);
+        } else {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
+
+  async toggleSaveMessage(id) {
+    const db = await this.getDb();
+    if (!db) return null;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['messages', 'conversations'], 'readwrite');
+      const msgStore = tx.objectStore('messages');
+      const getReq = msgStore.get(id);
+      getReq.onsuccess = () => {
+        const msg = getReq.result;
+        if (msg) {
+          msg.saved = !msg.saved;
+          msgStore.put(msg);
+          resolve(msg);
+        } else {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
+
+  async setMessageReaction(id, emoji, username) {
+    const db = await this.getDb();
+    if (!db) return null;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readwrite');
+      const store = tx.objectStore('messages');
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const msg = getReq.result;
+        if (msg) {
+          msg.reactions = msg.reactions || {};
+          const current = Array.isArray(msg.reactions[emoji]) ? [...msg.reactions[emoji]] : [];
+          const user = String(username).toLowerCase();
+          const idx = current.indexOf(user);
+          if (idx >= 0) {
+            current.splice(idx, 1);
+          } else {
+            current.push(user);
+          }
+          if (current.length === 0) {
+            delete msg.reactions[emoji];
+          } else {
+            msg.reactions[emoji] = current;
+          }
+          store.put(msg);
+          resolve(msg);
+        } else {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
+
+  async votePollOption(messageId, optionId, username) {
+    const db = await this.getDb();
+    if (!db) return null;
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readwrite');
+      const store = tx.objectStore('messages');
+      const getReq = store.get(messageId);
+      getReq.onsuccess = () => {
+        const msg = getReq.result;
+        if (msg && msg.poll && Array.isArray(msg.poll.options)) {
+          const user = String(username).toLowerCase();
+          msg.poll.options.forEach((opt) => {
+            opt.votes = Array.isArray(opt.votes) ? opt.votes : [];
+            const idx = opt.votes.indexOf(user);
+            if (opt.id === optionId) {
+              if (idx < 0) opt.votes.push(user);
+            } else {
+              if (idx >= 0) opt.votes.splice(idx, 1);
+            }
+          });
+          store.put(msg);
+          resolve(msg);
+        } else {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => reject(getReq.error);
+    });
+  }
+
   async deleteMessage(id) {
     const db = await this.getDb();
     if (!db) return;
@@ -196,6 +325,67 @@ class MeshStorage {
       req.onsuccess = () => resolve(true);
       req.onerror = () => reject(req.error);
     });
+  }
+
+  async searchAllMessages(query) {
+    const db = await this.getDb();
+    if (!db || !query || !query.trim()) return [];
+    const q = query.trim().toLowerCase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readonly');
+      const store = tx.objectStore('messages');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const list = req.result || [];
+        const matches = list
+          .filter((m) => m.text && m.text.toLowerCase().includes(q))
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        resolve(matches);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async getSavedMessages() {
+    const db = await this.getDb();
+    if (!db) return [];
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('messages', 'readonly');
+      const store = tx.objectStore('messages');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const list = req.result || [];
+        const matches = list
+          .filter((m) => m.saved === true || m.conversationId === '__saved_notes__')
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        resolve(matches);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async toggleConversationFavorite(conversationId) {
+    const conv = await this.getConversation(conversationId);
+    if (!conv) return null;
+    conv.isFavorite = !conv.isFavorite;
+    await this.saveConversation(conv);
+    return conv;
+  }
+
+  async toggleConversationMuted(conversationId) {
+    const conv = await this.getConversation(conversationId);
+    if (!conv) return null;
+    conv.isMuted = !conv.isMuted;
+    await this.saveConversation(conv);
+    return conv;
+  }
+
+  async toggleConversationArchived(conversationId) {
+    const conv = await this.getConversation(conversationId);
+    if (!conv) return null;
+    conv.isArchived = !conv.isArchived;
+    await this.saveConversation(conv);
+    return conv;
   }
 
   // --- Drafts ---

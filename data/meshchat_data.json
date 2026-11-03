@@ -30,10 +30,46 @@
       "avatar": "avatar_1",
       "bio": "Living peacefully in Golden Grove.",
       "createdAt": 1793520180728,
-      "lastActive": 1793520180728
+      "lastActive": 1793719741950
+    },
+    "verif_test_user": {
+      "username": "verif_test_user",
+      "displayName": "Tester",
+      "avatar": "avatar_1",
+      "bio": "Hey there! I am using MeshChat.",
+      "createdAt": 1793635959036,
+      "lastActive": 1793635959036
+    },
+    "sylvan_sage": {
+      "username": "sylvan_sage",
+      "displayName": "Sylvan Sage",
+      "avatar": "/avatars/nature_grove_oak.svg",
+      "bio": "Dweller of the Golden Grove",
+      "passwordHash": "bee5f17c6d6136e6a130e7f61777ac9b185a21359827643c66b6a6a5480d8d3ef871ccbd3e81533553299fa1d317dad7f773921b2a1716cee84532d06b77ee4a",
+      "salt": "a7c12cf142cca65c0cd2006037704c18",
+      "createdAt": 1793719737999,
+      "lastActive": 1793719743705
     }
   },
   "signals": [],
   "friends": {},
-  "requests": []
+  "requests": [],
+  "files": {
+    "grove_file_1793717727376_y3f8wbk": {
+      "id": "grove_file_1793717727376_y3f8wbk",
+      "originalName": "report (final).pdf",
+      "sanitizedName": "report _final_.pdf",
+      "mimeType": "application/pdf",
+      "size": 16,
+      "totalChunks": 1,
+      "uploadedChunks": [
+        0
+      ],
+      "isComplete": true,
+      "sender": "alice",
+      "recipient": "bob",
+      "uploadedAt": 1793717727376,
+      "fileExtension": ".pdf"
+    }
+  }
 }

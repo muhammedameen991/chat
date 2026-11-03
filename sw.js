@@ -1,32 +1,6 @@
-/**
- * Golden Grove - Service Worker
- * Provides offline shell caching and network-first dynamic resource fetching.
- */
-
-const CACHE_NAME = 'goldengrove-v2';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  '/assets/logo.svg',
-  '/js/utils.js',
-  '/js/storage.js',
-  '/js/signaling.js',
-  '/js/webrtc.js',
-  '/js/auth.js',
-  '/js/users.js',
-  '/js/chat.js',
-  '/js/ui.js',
-];
+const CACHE_NAME = 'goldengrove-v3';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -44,19 +18,30 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Do not cache API or signaling requests
+  // Never cache API, signaling or SSE requests
   if (url.pathname.startsWith('/api/')) {
     return;
   }
 
+  // Network-first strategy with cache fallback
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+        });
+      })
   );
 });

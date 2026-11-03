@@ -38,10 +38,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      // Cmd+K or Ctrl+K to open friend search
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      // Cmd+K or Ctrl+K to open Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        ui.openSearchModal();
+        ui.openCommandPalette();
       }
     });
 

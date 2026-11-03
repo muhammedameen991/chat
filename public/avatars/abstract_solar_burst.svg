@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="40" fill="#557945"/>
+  <g transform="translate(80,80)">
+    <g fill="#FFCB3D">
+      <polygon points="0,-60 12,-20 -12,-20"/>
+      <polygon points="0,60 12,20 -12,20"/>
+      <polygon points="-60,0 -20,12 -20,-12"/>
+      <polygon points="60,0 20,12 20,-12"/>
+    </g>
+    <g fill="#F1A344" transform="rotate(45)">
+      <polygon points="0,-50 10,-18 -10,-18"/>
+      <polygon points="0,50 10,18 -10,18"/>
+      <polygon points="-50,0 -18,10 -18,-10"/>
+      <polygon points="50,0 18,10 18,-10"/>
+    </g>
+    <circle cx="0" cy="0" r="22" fill="#FFE382"/>
+    <circle cx="0" cy="0" r="12" fill="#FFF9ED"/>
+  </g>
+</svg>

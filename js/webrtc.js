@@ -288,6 +288,60 @@ export class WebRTCManager {
         break;
       }
 
+      case 'reaction': {
+        this.emit('messageReaction', {
+          peer,
+          messageId: data.messageId,
+          emoji: data.emoji,
+          username: data.username,
+        });
+        break;
+      }
+
+      case 'edit': {
+        this.emit('messageEdited', {
+          peer,
+          messageId: data.messageId,
+          newText: data.newText,
+        });
+        break;
+      }
+
+      case 'delete': {
+        this.emit('messageDeleted', {
+          peer,
+          messageId: data.messageId,
+        });
+        break;
+      }
+
+      case 'pin': {
+        this.emit('messagePinned', {
+          peer,
+          messageId: data.messageId,
+          pinned: !!data.pinned,
+        });
+        break;
+      }
+
+      case 'poll_vote': {
+        this.emit('pollVoted', {
+          peer,
+          messageId: data.messageId,
+          optionId: data.optionId,
+          username: data.username,
+        });
+        break;
+      }
+
+      case 'call_signal': {
+        this.emit('callSignal', {
+          peer,
+          signal: data,
+        });
+        break;
+      }
+
       case 'file_meta': {
         this.emit('fileMeta', { peer, fileMeta: data });
         break;
